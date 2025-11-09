@@ -1,0 +1,14 @@
+/target/
+/**/target/
+*.iml
+.idea/
+.vscode/
+*.log
+.DS_Store
+/.mvn/
+/.mvn/
+*.class
+*.jar
+application*.properties
+application*.yml
+.env
