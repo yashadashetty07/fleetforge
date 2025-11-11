@@ -16,12 +16,22 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "registration_number", nullable = false, unique = true)
     private String registrationNumber;
 
-    @Column(nullable = false)
+    @Column(name ="make",nullable = false)
+    private String make;
+
+    @Column(name ="model",nullable = false)
     private String model;
 
-    @Column(nullable = false)
+    @Column(name ="year",nullable = false)
+    private Integer year;
+
+    @Column(name ="capacity",nullable = false)
+    private Integer capacity;
+
+    @Column(name ="status",nullable = false)
     private String status;
 }
+

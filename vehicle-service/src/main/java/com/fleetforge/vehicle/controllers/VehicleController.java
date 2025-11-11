@@ -1,8 +1,9 @@
 package com.fleetforge.vehicle.controllers;
 
 import com.fleetforge.vehicle.entities.Vehicle;
-import com.fleetforge.vehicle.repositories.VehicleRepository;
+import com.fleetforge.vehicle.services.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,15 +13,36 @@ import java.util.List;
 public class VehicleController {
 
     @Autowired
-    private VehicleRepository vehicleRepository;
+    private VehicleService vehicleService;
 
     @GetMapping
-    public List<Vehicle> getAllVehicles() {
-        return vehicleRepository.findAll();
+    public ResponseEntity<List<Vehicle>> getAllVehicles() {
+        return ResponseEntity.ok(vehicleService.getAllVehicles());
     }
 
     @PostMapping
-    public Vehicle createVehicle(@RequestBody Vehicle vehicle) {
-        return vehicleRepository.save(vehicle);
+    public ResponseEntity<Vehicle> addVehicle(@RequestBody Vehicle vehicle) {
+        return ResponseEntity.ok(vehicleService.addVehicle(vehicle));
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<Vehicle> getVehiclesById(@PathVariable("id") Long id) {
+        Vehicle vehicle = vehicleService.getVehicleById(id);
+        if (vehicle == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(vehicle);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Vehicle> updateVehicle(@PathVariable("id") Long id, @RequestBody Vehicle vehicle) {
+        Vehicle updated = vehicleService.updateVehicle(id, vehicle);
+        if (updated == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteVehicle(@PathVariable("id")  Long id) {
+        boolean deleted = vehicleService.deleteVehicle(id);
+        if (!deleted) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok("Vehicle with id "+id+" is deleted successfully");
+    }
+
 }
