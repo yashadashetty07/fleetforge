@@ -24,6 +24,7 @@ public class VehicleController {
     public ResponseEntity<Vehicle> addVehicle(@RequestBody Vehicle vehicle) {
         return ResponseEntity.ok(vehicleService.addVehicle(vehicle));
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<Vehicle> getVehiclesById(@PathVariable("id") Long id) {
         Vehicle vehicle = vehicleService.getVehicleById(id);
@@ -39,10 +40,29 @@ public class VehicleController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteVehicle(@PathVariable("id")  Long id) {
+    public ResponseEntity<String> deleteVehicle(@PathVariable("id") Long id) {
         boolean deleted = vehicleService.deleteVehicle(id);
         if (!deleted) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok("Vehicle with id "+id+" is deleted successfully");
+        return ResponseEntity.ok("Vehicle with id " + id + " is deleted successfully");
     }
 
+    @PostMapping("/{id}/assign")
+    public ResponseEntity<Vehicle> assignVehicle(@PathVariable("id") Long id) {
+        Vehicle vehicle = vehicleService.assignVehicle(id);
+        return ResponseEntity.ok(vehicle);
+    }
+
+    // Release a vehicle (mark as AVAILABLE)
+    @PostMapping("/{id}/release")
+    public ResponseEntity<Vehicle> releaseVehicle(@PathVariable("id") Long id) {
+        Vehicle vehicle = vehicleService.releaseVehicle(id);
+        return ResponseEntity.ok(vehicle);
+    }
+
+    // Get vehicles by status
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<Vehicle>> getVehiclesByStatus(@PathVariable("status") Vehicle.Status status) {
+        List<Vehicle> vehicles = vehicleService.getAvailableVehicles(); // fetch by status
+        return ResponseEntity.ok(vehicles);
+    }
 }

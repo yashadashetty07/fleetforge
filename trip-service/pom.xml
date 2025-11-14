@@ -8,10 +8,23 @@
         <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <parameters>true</parameters>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>vehicle-service</artifactId>
-    <name>Vehicle Service</name>
+    <artifactId>trip-service</artifactId>
+    <name>Trip Service</name>
 
     <dependencies>
         <dependency>
@@ -34,6 +47,16 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.42</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fleetforge</groupId>
+            <artifactId>trip-service</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webflux</artifactId>
         </dependency>
     </dependencies>
 </project>

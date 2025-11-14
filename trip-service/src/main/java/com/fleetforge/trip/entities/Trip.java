@@ -1,47 +1,49 @@
 package com.fleetforge.trip.entities;
 
-
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
+import lombok.*;
 
 @Entity
 @Table(name = "trips")
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Trip {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
+    private String origin;
+    private String destination;
 
-    @Column(nullable = false)
+    @Column(name = "origin_lat")
+    private double originLat;
+
+    @Column(name = "origin_lng")
+    private double originLng;
+
+    @Column(name = "destination_lat")
+    private double destinationLat;
+
+    @Column(name = "destination_lng")
+    private double destinationLng;
+
     private Long vehicleId;
-
-    @Column(nullable = false)
     private Long driverId;
 
-    @Column(nullable = false)
-    private Long routeId;
+    private double distance;
+    private double eta;
 
-    @Column(nullable = false)
-    private LocalDate startDate;
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.SCHEDULED;
 
-    @Column(nullable = false)
-    private LocalDate endDate;
-
-    @Column(nullable = false)
-    private Double distanceKm;
-
-    @Column(nullable = false)
-    private Integer estimatedDurationMinutes;
-
-
+    public enum Status {
+        SCHEDULED,
+        IN_PROGRESS,
+        COMPLETED,
+        CANCELLED
+    }
 }

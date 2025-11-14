@@ -8,10 +8,25 @@
         <version>1.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <parameters>true</parameters>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>vehicle-service</artifactId>
-    <name>Vehicle Service</name>
+    <artifactId>route-service</artifactId>
+    <name>Route Service</name>
 
     <dependencies>
         <dependency>
@@ -34,6 +49,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.42</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20250517</version>
         </dependency>
     </dependencies>
 </project>

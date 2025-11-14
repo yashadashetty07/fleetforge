@@ -31,7 +31,14 @@ public class Vehicle {
     @Column(name ="capacity",nullable = false)
     private Integer capacity;
 
+    @Enumerated(EnumType.STRING)
     @Column(name ="status",nullable = false)
-    private String status;
+    private Status status = Status.AVAILABLE; // default available
+
+    public enum Status {
+        AVAILABLE,
+        ON_TRIP,
+        MAINTENANCE
+    }
 }
 
