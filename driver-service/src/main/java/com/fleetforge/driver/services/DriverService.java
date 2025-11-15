@@ -43,4 +43,8 @@ public class DriverService {
         driverRepository.deleteById(id);
         return true;
     }
+    public Driver getDriverByUsername(String username) {
+        return driverRepository.findByName(username); // or findByUsername if you have that
+    }
+
 }

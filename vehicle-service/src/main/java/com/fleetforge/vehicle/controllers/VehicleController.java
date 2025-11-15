@@ -52,14 +52,12 @@ public class VehicleController {
         return ResponseEntity.ok(vehicle);
     }
 
-    // Release a vehicle (mark as AVAILABLE)
     @PostMapping("/{id}/release")
     public ResponseEntity<Vehicle> releaseVehicle(@PathVariable("id") Long id) {
         Vehicle vehicle = vehicleService.releaseVehicle(id);
         return ResponseEntity.ok(vehicle);
     }
 
-    // Get vehicles by status
     @GetMapping("/status/{status}")
     public ResponseEntity<List<Vehicle>> getVehiclesByStatus(@PathVariable("status") Vehicle.Status status) {
         List<Vehicle> vehicles = vehicleService.getAvailableVehicles(); // fetch by status

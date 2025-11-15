@@ -1,6 +1,7 @@
 package com.fleetforge.trip.services;
 
 import com.fleetforge.trip.entities.Trip;
+import com.fleetforge.trip.entities.TripStatus;
 import com.fleetforge.trip.repositories.TripRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,9 +21,17 @@ public class TripService {
     @Autowired
     private RouteServiceClient routeServiceClient;
 
+    @Autowired
+    private VehicleServiceClient vehicleClient;
+
+    @Autowired
+    private DriverServiceClient driverClient;   // needed to convert username → driverId
+
+
+    // -------------------- CREATE TRIP --------------------
     public Trip createTrip(Trip trip) {
-        // call route service by origin/destination strings
-        RouteServiceClient.RouteInfo info = routeServiceClient.calculateRoute(trip.getOrigin(), trip.getDestination());
+        RouteServiceClient.RouteInfo info =
+                routeServiceClient.calculateRoute(trip.getOrigin(), trip.getDestination());
 
         if (info != null) {
             trip.setOriginLat(info.getOriginLat());
@@ -31,12 +40,14 @@ public class TripService {
             trip.setDestinationLng(info.getDestinationLng());
             trip.setDistance(info.getDistance());
             trip.setEta(info.getEta());
-        } // if null, keep whatever caller provided or zeros; optional: throw error
+        }
 
-        trip.setStatus(Trip.Status.SCHEDULED);
+        trip.setStatus(TripStatus.PENDING);
         return tripRepository.save(trip);
     }
 
+
+    // -------------------- GETTERS --------------------
     public List<Trip> getTripsByDriver(Long driverId) {
         return tripRepository.findByDriverId(driverId);
     }
@@ -46,45 +57,90 @@ public class TripService {
     }
 
     public Trip getTripById(Long id) {
-        return tripRepository.findById(id).orElseThrow(() -> new RuntimeException("Trip not found with id:" + id));
+        return tripRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Trip not found with id:" + id));
     }
 
-    public Trip updateTripStatus(Long tripId, Trip.Status status) {
+
+    // -------------------- BASIC UPDATE (not used in workflow) --------------------
+    public Trip updateTripStatus(Long tripId, TripStatus status) {
         Optional<Trip> optionalTrip = tripRepository.findById(tripId);
         if (optionalTrip.isEmpty()) return null;
+
         Trip trip = optionalTrip.get();
         trip.setStatus(status);
         return tripRepository.save(trip);
     }
 
+
+    // -------------------- DELETE --------------------
     public void deleteTrip(Long id) {
         Trip existingTrip = tripRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Trip not found with id: " + id));
+
         tripRepository.delete(existingTrip);
     }
 
-    public Trip startTrip(Long id) {
-        Trip trip = tripRepository.findById(id)
+
+    // -------------------- START TRIP --------------------
+    public Trip startTrip(Long tripId, String usernameFromToken) {
+
+        Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new RuntimeException("Trip not found"));
-        trip.setStatus(Trip.Status.valueOf("IN_PROGRESS"));
+
+        // Convert username → driverId
+        Long driverIdFromToken = driverClient.getDriverIdByUsername(usernameFromToken);
+
+        // Validation: only assigned driver can start
+        if (!trip.getDriverId().equals(driverIdFromToken)) {
+            throw new RuntimeException("You are not assigned to this trip");
+        }
+
+        // Validation: must be pending
+        if (trip.getStatus() != TripStatus.PENDING) {
+            throw new RuntimeException("Trip cannot be started in current state");
+        }
+
+        // Update vehicle status → BUSY
+        vehicleClient.assignVehicle(trip.getVehicleId());
+
+        // Mark trip as in progress
+        trip.setStatus(TripStatus.IN_PROGRESS);
+
         return tripRepository.save(trip);
     }
 
-    public Trip completeTrip(Long id) {
-        Trip trip = tripRepository.findById(id)
+
+    // -------------------- COMPLETE TRIP --------------------
+    public Trip completeTrip(Long tripId, String usernameFromToken) {
+
+        Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new RuntimeException("Trip not found"));
-        trip.setStatus(Trip.Status.valueOf("COMPLETED"));
+
+        // Convert username → driverId
+        Long driverIdFromToken = driverClient.getDriverIdByUsername(usernameFromToken);
+
+        // Validation: only assigned driver can complete
+        if (!trip.getDriverId().equals(driverIdFromToken)) {
+            throw new RuntimeException("You are not assigned to this trip");
+        }
+
+        // Validation: must be in progress
+        if (trip.getStatus() != TripStatus.IN_PROGRESS) {
+            throw new RuntimeException("Trip cannot be completed now");
+        }
+
+        // Update vehicle status → AVAILABLE
+        vehicleClient.releaseVehicle(trip.getVehicleId());
+
+        // Mark trip completed
+        trip.setStatus(TripStatus.COMPLETED);
+
         return tripRepository.save(trip);
     }
 
-    public Trip cancelTrip(Long id) {
-        Trip trip = tripRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Trip not found"));
-        trip.setStatus(Trip.Status.valueOf("CANCELLED"));
-        return tripRepository.save(trip);
-    }
-// -------------------- TRIP SUMMARY METHODS --------------------
 
+    // -------------------- SUMMARY METHODS --------------------
     public Map<String, Object> getDriverTripSummary(Long driverId) {
         List<Trip> trips = tripRepository.findByDriverId(driverId);
         double totalDistance = trips.stream().mapToDouble(Trip::getDistance).sum();
@@ -123,7 +179,6 @@ public class TripService {
         summary.put("averageEta", avgEta);
         return summary;
     }
-    // TripService.java
 
     public Map<String, Object> getOverallTripSummary() {
         List<Trip> trips = tripRepository.findAll();
@@ -143,6 +198,5 @@ public class TripService {
                 "tripsPerVehicle", tripsPerVehicle
         );
     }
-
 
 }

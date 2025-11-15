@@ -2,6 +2,7 @@ package com.fleetforge.trip.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fleetforge.trip.entities.TripStatus;
 
 @Entity
 @Table(name = "trips")
@@ -38,12 +39,6 @@ public class Trip {
     private double eta;
 
     @Enumerated(EnumType.STRING)
-    private Status status = Status.SCHEDULED;
+    private TripStatus status = TripStatus.PENDING;
 
-    public enum Status {
-        SCHEDULED,
-        IN_PROGRESS,
-        COMPLETED,
-        CANCELLED
-    }
 }
