@@ -53,8 +53,8 @@ public class AuthServiceImpl implements AuthService {
         return new LoginResponse(token, user.getRole().name(), user.getUsername());
     }
 
-    public String approveDriver(String username) {
-        Users user = usersRepository.findByUsername(username)
+    public String approveDriver(Long id) {
+        Users user = usersRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (user.getRole() != Role.DRIVER) {
@@ -64,7 +64,7 @@ public class AuthServiceImpl implements AuthService {
         user.setIsApproved(true);
         usersRepository.save(user);
 
-        return "Driver " + username + " approved successfully";
+        return "Driver with id " + id + " has been approved successfully";
     }
 
 

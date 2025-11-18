@@ -37,9 +37,9 @@ public class AuthController {
         }
     }
 
-    @PutMapping("/approve/{username}")
-    public ResponseEntity<String> approveDriver(@PathVariable("username") String username) {
-        String message = authService.approveDriver(username);
+    @PutMapping("/approve/{id}")
+    public ResponseEntity<String> approveDriver(@PathVariable("id") Long id) {
+        String message = authService.approveDriver(id);
         return ResponseEntity.ok(message);
     }
 

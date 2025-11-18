@@ -19,26 +19,22 @@ public class Vehicle {
     @Column(name = "registration_number", nullable = false, unique = true)
     private String registrationNumber;
 
-    @Column(name ="make",nullable = false)
+    @Column(name = "make", nullable = false)
     private String make;
 
-    @Column(name ="model",nullable = false)
+    @Column(name = "model", nullable = false)
     private String model;
 
-    @Column(name ="year",nullable = false)
+    @Column(name = "year", nullable = false)
     private Integer year;
 
-    @Column(name ="capacity",nullable = false)
+    @Column(name = "capacity", nullable = false)
     private Integer capacity;
 
     @Enumerated(EnumType.STRING)
-    @Column(name ="status",nullable = false)
-    private Status status = Status.AVAILABLE; // default available
+    @Column(name = "status", nullable = false)
+    private VehicleStatus status = VehicleStatus.AVAILABLE; // default available
 
-    public enum Status {
-        AVAILABLE,
-        ON_TRIP,
-        MAINTENANCE
-    }
+
 }
 

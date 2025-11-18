@@ -9,5 +9,5 @@ import org.springframework.stereotype.Service;
 public interface AuthService {
     Users registerUser(Users user);
     LoginResponse login(LoginRequest loginRequest);
-    String approveDriver(String username);
+    String approveDriver(Long id);
 }

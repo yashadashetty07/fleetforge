@@ -26,7 +26,7 @@ public class MapboxService {
     public double[] getDistanceAndDuration(double originLng, double originLat, double destLng, double destLat) {
         try {
             String coordinates = String.format("%f,%f;%f,%f", originLng, originLat, destLng, destLat);
-            String url = String.format("%s/%s?access_token=%s&geometries=geojson", apiUrl, coordinates, apiKey);
+            String url = String.format("%s/%sjson?country=IN&limit=5&access_token=%s&geometries=geojson", apiUrl, coordinates, apiKey);
 
             String response = restTemplate.getForObject(url, String.class);
             JSONObject json = new JSONObject(response);
@@ -50,7 +50,7 @@ public class MapboxService {
     public JSONObject getDirections(double originLng, double originLat, double destLng, double destLat) {
         try {
             String coordinates = String.format("%f,%f;%f,%f", originLng, originLat, destLng, destLat);
-            String url = String.format("%s/%s?access_token=%s&geometries=geojson", apiUrl, coordinates, apiKey);
+            String url = String.format("%s/%sjson?country=IN&limit=5?access_token=%s&geometries=geojson", apiUrl, coordinates, apiKey);
 
             String response = restTemplate.getForObject(url, String.class);
             return new JSONObject(response);
@@ -64,7 +64,7 @@ public class MapboxService {
     public JSONObject geocodeAddress(String address) {
         try {
             String encodedAddress = address.replace(" ", "%20");
-            String url = String.format("%s/%s.json?access_token=%s", geocodeUrl, encodedAddress, apiKey);
+            String url = String.format("%s/%s.json?country=IN&limit=5access_token=%s", geocodeUrl, encodedAddress, apiKey);
 
             String response = restTemplate.getForObject(url, String.class);
             return new JSONObject(response);

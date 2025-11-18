@@ -1,6 +1,7 @@
 package com.fleetforge.vehicle.services;
 
 import com.fleetforge.vehicle.entities.Vehicle;
+import com.fleetforge.vehicle.entities.VehicleStatus;
 import com.fleetforge.vehicle.repositories.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,11 +61,11 @@ public class VehicleService {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
 
-        if (vehicle.getStatus() != Vehicle.Status.AVAILABLE) {
+        if (vehicle.getStatus() != VehicleStatus.AVAILABLE) {
             throw new RuntimeException("Vehicle is not available");
         }
 
-        vehicle.setStatus(Vehicle.Status.ON_TRIP);
+        vehicle.setStatus(VehicleStatus.ON_TRIP);
         return vehicleRepository.save(vehicle);
     }
 
@@ -72,12 +73,12 @@ public class VehicleService {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
 
-        vehicle.setStatus(Vehicle.Status.AVAILABLE);
+        vehicle.setStatus(VehicleStatus.AVAILABLE);
         return vehicleRepository.save(vehicle);
     }
 
     public List<Vehicle> getAvailableVehicles() {
-        return vehicleRepository.findByStatus(Vehicle.Status.AVAILABLE);
+        return vehicleRepository.findByStatus(VehicleStatus.AVAILABLE);
     }
 
     private void validateRegistration(String reg) {

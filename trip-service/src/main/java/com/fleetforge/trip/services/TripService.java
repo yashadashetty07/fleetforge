@@ -28,7 +28,6 @@ public class TripService {
     private DriverServiceClient driverClient;   // needed to convert username → driverId
 
 
-    // -------------------- CREATE TRIP --------------------
     public Trip createTrip(Trip trip) {
         RouteServiceClient.RouteInfo info =
                 routeServiceClient.calculateRoute(trip.getOrigin(), trip.getDestination());
@@ -47,7 +46,6 @@ public class TripService {
     }
 
 
-    // -------------------- GETTERS --------------------
     public List<Trip> getTripsByDriver(Long driverId) {
         return tripRepository.findByDriverId(driverId);
     }

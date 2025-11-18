@@ -43,11 +43,11 @@ public class DriverController {
     public ResponseEntity<String> deleteDriver(@PathVariable("id") Long id) {
         boolean deleted = driverService.deleteDriver(id);
         if (!deleted) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok("Driver deleted successfully");
+        return ResponseEntity.ok("Driver with id " +id+" deleted successfully");
     }
 
     @GetMapping("/username/{username}")
-    public ResponseEntity<Driver> getDriverByUsername(@PathVariable String username) {
+    public ResponseEntity<Driver> getDriverByUsername(@PathVariable("username") String username) {
         Driver d = driverService.getDriverByUsername(username);
         if (d == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(d);

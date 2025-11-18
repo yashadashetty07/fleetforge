@@ -1,6 +1,7 @@
 package com.fleetforge.vehicle.controllers;
 
 import com.fleetforge.vehicle.entities.Vehicle;
+import com.fleetforge.vehicle.entities.VehicleStatus;
 import com.fleetforge.vehicle.services.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +60,7 @@ public class VehicleController {
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Vehicle>> getVehiclesByStatus(@PathVariable("status") Vehicle.Status status) {
+    public ResponseEntity<List<Vehicle>> getVehiclesByStatus(@PathVariable("status") VehicleStatus status) {
         List<Vehicle> vehicles = vehicleService.getAvailableVehicles(); // fetch by status
         return ResponseEntity.ok(vehicles);
     }
