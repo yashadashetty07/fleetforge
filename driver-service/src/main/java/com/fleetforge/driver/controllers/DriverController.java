@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/drivers")
@@ -16,9 +17,12 @@ public class DriverController {
     private DriverService driverService;
 
     @PostMapping
-    public ResponseEntity<Driver> addDriver(@RequestBody Driver driver) {
-        return ResponseEntity.ok(driverService.addDriver(driver));
+    public ResponseEntity<?> addDriver(@RequestBody Driver driver) {
+        Map<String, Object> response = driverService.addDriver(driver);
+        return ResponseEntity.ok(response);
     }
+
+
 
     @GetMapping
     public ResponseEntity<List<Driver>> getAllDrivers() {
@@ -46,8 +50,8 @@ public class DriverController {
         return ResponseEntity.ok("Driver with id " +id+" deleted successfully");
     }
 
-    @GetMapping("/username/{username}")
-    public ResponseEntity<Driver> getDriverByUsername(@PathVariable("username") String username) {
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Driver> getDriverByUsername(@PathVariable("email") String username) {
         Driver d = driverService.getDriverByUsername(username);
         if (d == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(d);

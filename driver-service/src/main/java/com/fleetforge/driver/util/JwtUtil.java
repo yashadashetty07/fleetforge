@@ -1,12 +1,10 @@
-package com.fleetforge.auth.util;
+package com.fleetforge.driver.util;
 
-import com.fleetforge.auth.services.DriverServiceClient;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,23 +17,19 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    @Autowired
-    private DriverServiceClient driverServiceClient;
-
-
     @Value("${jwt.secret}")
     private String secretKey;
 
     @Value("${jwt.expiration}")
     private Long jwtExpiration;
 
+
     public String generateToken(String username, String role) {
         Map<String, Object> claims = new HashMap<>();
-
         claims.put("role", role);
 
-        Long now = System.currentTimeMillis();
-        Long expiry = System.currentTimeMillis() + jwtExpiration;
+        long now = System.currentTimeMillis();
+        long expiry = now + jwtExpiration;
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -47,12 +41,14 @@ public class JwtUtil {
     }
 
     public boolean validateToken(String token, String username) {
-        return (username.equals(extractAllClaims(token).getSubject()) && (!isTokenExpired(token)));
+        String extracted = extractUsername(token);
+        return (extracted.equals(username) && !isTokenExpired(token));
     }
 
     public boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
     }
+
 
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
@@ -62,16 +58,15 @@ public class JwtUtil {
         return extractAllClaims(token).get("role", String.class);
     }
 
-    public Key getSigningKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
-    }
-
-
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 }

@@ -22,7 +22,10 @@ public class Driver {
     @Column(name = "license_number", nullable = false, unique = true)
     private String licenseNumber;
 
+    @Column(name = "phone", nullable = false, unique = true)
     private String phone;
+
+    @Column(name ="email", nullable = false, unique = true)
     private String email;
-    private String status; // e.g., AVAILABLE, ON_TRIP, INACTIVE
+    private String status;
 }

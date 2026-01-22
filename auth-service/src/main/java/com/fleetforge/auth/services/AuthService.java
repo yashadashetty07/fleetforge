@@ -10,4 +10,8 @@ public interface AuthService {
     Users registerUser(Users user);
     LoginResponse login(LoginRequest loginRequest);
     String approveDriver(Long id);
+    void changePassword(String username, String oldPassword, String newPassword);
+    String createDriverUser(String username);
+
+
 }

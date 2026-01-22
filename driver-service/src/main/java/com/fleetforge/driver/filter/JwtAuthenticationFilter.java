@@ -1,6 +1,6 @@
-package com.fleetforge.auth.filter;
+package com.fleetforge.driver.filter;
 
-import com.fleetforge.auth.util.JwtUtil;
+import com.fleetforge.driver.util.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,37 +22,44 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
+
         String authHeader = request.getHeader("Authorization");
         String username = null;
         String jwtToken = null;
 
-        String path = request.getRequestURI();
-        if (path.equals("/api/auth/create-driver-user")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
+        // Extract Bearer token
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwtToken = authHeader.substring(7);
+
             try {
                 username = jwtUtil.extractUsername(jwtToken);
             } catch (ExpiredJwtException e) {
-                logger.error("JWT expired: " + e.getMessage());
+                logger.error("JWT Token expired: " + e.getMessage());
             } catch (Exception ex) {
-                logger.error("Invalid JWT: " + ex.getMessage());
+                logger.error("Invalid JWT Token: " + ex.getMessage());
             }
         }
 
+        // Validate and authenticate user
         if (username != null && jwtUtil.validateToken(jwtToken, username)) {
             UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    new UsernamePasswordAuthenticationToken(
+                            username, null, Collections.emptyList()
+                    );
+
+            authToken.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
+
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
+
         filterChain.doFilter(request, response);
     }
-
 }

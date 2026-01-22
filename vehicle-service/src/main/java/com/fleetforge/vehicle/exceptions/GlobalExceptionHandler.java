@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleAllExceptions(Exception ex) {
         // Print error details to console for debugging
-        System.err.println("❌ Exception occurred: " + ex.getMessage());
+        System.err.println(" Exception occurred: " + ex.getMessage());
         ex.printStackTrace();
 
         // Build structured response body

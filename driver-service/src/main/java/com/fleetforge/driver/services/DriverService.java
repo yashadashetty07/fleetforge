@@ -5,7 +5,9 @@ import com.fleetforge.driver.repositories.DriverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DriverService {
@@ -13,9 +15,29 @@ public class DriverService {
     @Autowired
     private DriverRepository driverRepository;
 
-    public Driver addDriver(Driver driver) {
-        return driverRepository.save(driver);
+    @Autowired
+    private AuthServiceClient authServiceClient;
+
+    public Map<String, Object> addDriver(Driver driver) {
+        Driver saved = driverRepository.save(driver);
+
+        if (driver.getEmail() == null || driver.getEmail().isBlank()) {
+            throw new RuntimeException("Driver email is required");
+        }
+
+        String username = driver.getEmail();
+        String tempPassword = authServiceClient.createDriverUser(username);
+
+        // return driver + temp password to frontend
+        return Map.of(
+                "driver", saved,
+                "username", username,
+                "tempPassword", tempPassword
+        );
     }
+
+
+
 
     public List<Driver> getAllDrivers() {
         return driverRepository.findAll();
@@ -43,8 +65,9 @@ public class DriverService {
         driverRepository.deleteById(id);
         return true;
     }
-    public Driver getDriverByUsername(String username) {
-        return driverRepository.findByName(username); // or findByUsername if you have that
+    public Driver getDriverByUsername(String email) {
+        return driverRepository.findByEmail(email);
     }
+
 
 }

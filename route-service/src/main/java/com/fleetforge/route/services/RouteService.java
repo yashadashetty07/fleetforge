@@ -43,7 +43,7 @@ public class RouteService {
             route.setEstimatedDurationMinutes(result[1]);
 
         } catch (Exception e) {
-            System.out.println("⚠️ Mapbox auto-calculation failed: " + e.getMessage());
+            System.out.println(" Mapbox auto-calculation failed: " + e.getMessage());
             route.setDistanceKm(0.0);
             route.setEstimatedDurationMinutes(0.0);
         }

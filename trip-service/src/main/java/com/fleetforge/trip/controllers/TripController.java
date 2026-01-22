@@ -2,6 +2,7 @@ package com.fleetforge.trip.controllers;
 
 import com.fleetforge.trip.entities.Trip;
 import com.fleetforge.trip.entities.TripStatus;
+import com.fleetforge.trip.services.DriverServiceClient;
 import com.fleetforge.trip.services.TripService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,32 +18,49 @@ public class TripController {
     @Autowired
     private TripService tripService;
 
-    // -------------------- CREATE TRIP (ADMIN) --------------------
+    @Autowired
+    private DriverServiceClient driverServiceClient;
+
     @PostMapping
     public ResponseEntity<Trip> createTrip(@RequestBody Trip tripRequest) {
         Trip saved = tripService.createTrip(tripRequest);
         return ResponseEntity.ok(saved);
     }
+//
+//    @GetMapping("/driver/{driverId}")
+//    public ResponseEntity<List<Trip>> getTripsByDriver(@PathVariable("driverId") Long driverId) {
+//        return ResponseEntity.ok(tripService.getTripsByDriver(driverId));
+//    }
 
-    // -------------------- GET TRIPS BY DRIVER --------------------
-    @GetMapping("/driver/{driverId}")
-    public ResponseEntity<List<Trip>> getTripsByDriver(@PathVariable("driverId") Long driverId) {
+    @GetMapping("/my")
+    public ResponseEntity<List<Trip>> getMyTrips(
+            @RequestHeader("X-User-Name") String username) {
+        Long driverId = driverServiceClient.getDriverIdByEmail(username);
         return ResponseEntity.ok(tripService.getTripsByDriver(driverId));
     }
 
-    // -------------------- GET ALL TRIPS (ADMIN) --------------------
+    @GetMapping("/my/active")
+    public ResponseEntity<Trip> getMyActiveTrip(
+            @RequestHeader("X-User-Name") String username) {
+
+        Long driverId = driverServiceClient.getDriverIdByEmail(username);
+        return tripService.getTripsByDriver(driverId).stream()
+                .filter(t -> t.getStatus() == TripStatus.IN_PROGRESS)
+                .findFirst()
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.ok(null));
+    }
+
     @GetMapping
     public ResponseEntity<List<Trip>> getAllTrips() {
         return ResponseEntity.ok(tripService.getAllTrips());
     }
 
-    // -------------------- GET TRIP BY ID --------------------
     @GetMapping("/{id}")
     public ResponseEntity<Trip> getTripById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(tripService.getTripById(id));
     }
 
-    // -------------------- UPDATE STATUS (NOT USED IN WORKFLOW) --------------------
     @PutMapping("/{id}/status")
     public ResponseEntity<Trip> updateTripStatus(@PathVariable("id") Long id,
                                                  @RequestParam("status") TripStatus status) {
@@ -51,14 +69,12 @@ public class TripController {
         return ResponseEntity.ok(updated);
     }
 
-    // -------------------- DELETE TRIP --------------------
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTrip(@PathVariable("id") Long id) {
         tripService.deleteTrip(id);
         return ResponseEntity.ok("Trip deleted successfully");
     }
 
-    // -------------------- START TRIP (DRIVER ONLY) --------------------
     @PutMapping("/{id}/start")
     public ResponseEntity<Trip> startTrip(
             @PathVariable("id") Long id,
@@ -98,4 +114,13 @@ public class TripController {
         Map<String, Object> summary = tripService.getAllTripsSummary();
         return ResponseEntity.ok(summary);
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<Trip> updateTrip(
+            @PathVariable Long id,
+            @RequestBody Trip tripRequest
+    ) {
+        Trip updated = tripService.updateTrip(id, tripRequest);
+        return ResponseEntity.ok(updated);
+    }
+
 }

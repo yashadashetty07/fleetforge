@@ -5,6 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @Service
 public class MapboxService {
 
@@ -13,23 +16,89 @@ public class MapboxService {
     @Value("${mapbox.api.key}")
     private String apiKey;
 
-    @Value("${mapbox.api.url}")
-    private String apiUrl; // e.g. https://api.mapbox.com/directions/v5/mapbox/driving
+    @Value("${mapbox.api.url}")          // https://api.mapbox.com/directions/v5/mapbox/driving
+    private String directionsUrl;
 
-    @Value("${mapbox.geocode.url}")
-    private String geocodeUrl; // e.g. https://api.mapbox.com/geocoding/v5/mapbox.places
+    @Value("${mapbox.geocode.url}")      // https://api.mapbox.com/geocoding/v5/mapbox.places
+    private String geocodeUrl;
 
     public MapboxService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    public double[] getDistanceAndDuration(double originLng, double originLat, double destLng, double destLat) {
+    /*--------------------------------------------------
+     * 1) Geocode a place name → lat/lon
+     *--------------------------------------------------*/
+    public JSONObject geocodeAddress(String address) {
         try {
-            String coordinates = String.format("%f,%f;%f,%f", originLng, originLat, destLng, destLat);
-            String url = String.format("%s/%sjson?country=IN&limit=5&access_token=%s&geometries=geojson", apiUrl, coordinates, apiKey);
+            String encoded = URLEncoder.encode(address, StandardCharsets.UTF_8);
+
+            String url = String.format(
+                    "%s/%s.json?access_token=%s&limit=1&country=IN",
+                    geocodeUrl, encoded, apiKey
+            );
 
             String response = restTemplate.getForObject(url, String.class);
-            JSONObject json = new JSONObject(response);
+            return new JSONObject(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new JSONObject().put("error", "Failed geocoding");
+        }
+    }
+
+    /*--------------------------------------------------
+     * 2) Autocomplete search
+     *--------------------------------------------------*/
+    public JSONObject searchPlaces(String query) {
+        try {
+            String encoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
+
+            String url = String.format(
+                    "%s/%s.json?access_token=%s&autocomplete=true&limit=5&country=IN",
+                    geocodeUrl, encoded, apiKey
+            );
+
+            String response = restTemplate.getForObject(url, String.class);
+            return new JSONObject(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new JSONObject().put("error", "Failed search");
+        }
+    }
+
+    /*--------------------------------------------------
+     * 3) Directions API → distance + duration + geometry
+     *--------------------------------------------------*/
+    public JSONObject getDirections(double originLng, double originLat,
+                                    double destLng, double destLat) {
+
+        try {
+            String coordinates = String.format(
+                    "%f,%f;%f,%f", originLng, originLat, destLng, destLat);
+
+            String url = String.format(
+                    "%s/%s?access_token=%s&geometries=geojson&overview=full",
+                    directionsUrl, coordinates, apiKey
+            );
+
+            String response = restTemplate.getForObject(url, String.class);
+            return new JSONObject(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new JSONObject().put("error", "Failed directions");
+        }
+    }
+
+    /*--------------------------------------------------
+     * 4) Extract distance + ETA
+     *--------------------------------------------------*/
+    public double[] getDistanceAndDuration(double originLng, double originLat,
+                                           double destLng, double destLat) {
+        try {
+            JSONObject json = getDirections(originLng, originLat, destLng, destLat);
 
             double distance = json.getJSONArray("routes")
                     .getJSONObject(0)
@@ -44,34 +113,6 @@ public class MapboxService {
         } catch (Exception e) {
             e.printStackTrace();
             return new double[]{0, 0};
-        }
-    }
-
-    public JSONObject getDirections(double originLng, double originLat, double destLng, double destLat) {
-        try {
-            String coordinates = String.format("%f,%f;%f,%f", originLng, originLat, destLng, destLat);
-            String url = String.format("%s/%sjson?country=IN&limit=5?access_token=%s&geometries=geojson", apiUrl, coordinates, apiKey);
-
-            String response = restTemplate.getForObject(url, String.class);
-            return new JSONObject(response);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new JSONObject().put("error", "Failed to fetch directions");
-        }
-    }
-
-    public JSONObject geocodeAddress(String address) {
-        try {
-            String encodedAddress = address.replace(" ", "%20");
-            String url = String.format("%s/%s.json?country=IN&limit=5access_token=%s", geocodeUrl, encodedAddress, apiKey);
-
-            String response = restTemplate.getForObject(url, String.class);
-            return new JSONObject(response);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new JSONObject().put("error", "Failed to geocode address");
         }
     }
 }

@@ -69,10 +69,13 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
         ServerWebExchange modifiedExchange = exchange.mutate()
                 .request(r -> r.headers(headers -> {
-                    headers.add("X-User-Name", claims.getSubject());
-                    headers.add("X-User-Role", role);
+                    headers.remove("X-User-Name");   // 🔥 force remove
+                    headers.remove("X-User-Role");
+                    headers.set("X-User-Name", claims.getSubject());
+                    headers.set("X-User-Role", role);
                 }))
                 .build();
+
 
 
         return chain.filter(modifiedExchange);

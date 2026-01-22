@@ -42,6 +42,7 @@ public class TripService {
         }
 
         trip.setStatus(TripStatus.PENDING);
+        System.out.println("RouteInfo = " + info);
         return tripRepository.save(trip);
     }
 
@@ -59,6 +60,21 @@ public class TripService {
                 .orElseThrow(() -> new RuntimeException("Trip not found with id:" + id));
     }
 
+    public Trip updateTrip(Long id, Trip updatedData) {
+        Trip trip = tripRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Trip not found"));
+
+        if (trip.getStatus() != TripStatus.PENDING) {
+            throw new RuntimeException("Only pending trips can be updated");
+        }
+
+        trip.setOrigin(updatedData.getOrigin());
+        trip.setDestination(updatedData.getDestination());
+        trip.setDriverId(updatedData.getDriverId());
+        trip.setVehicleId(updatedData.getVehicleId());
+
+        return tripRepository.save(trip);
+    }
 
     // -------------------- BASIC UPDATE (not used in workflow) --------------------
     public Trip updateTripStatus(Long tripId, TripStatus status) {
@@ -87,7 +103,7 @@ public class TripService {
                 .orElseThrow(() -> new RuntimeException("Trip not found"));
 
         // Convert username → driverId
-        Long driverIdFromToken = driverClient.getDriverIdByUsername(usernameFromToken);
+        Long driverIdFromToken = driverClient.getDriverIdByEmail(usernameFromToken);
 
         // Validation: only assigned driver can start
         if (!trip.getDriverId().equals(driverIdFromToken)) {
@@ -116,7 +132,7 @@ public class TripService {
                 .orElseThrow(() -> new RuntimeException("Trip not found"));
 
         // Convert username → driverId
-        Long driverIdFromToken = driverClient.getDriverIdByUsername(usernameFromToken);
+        Long driverIdFromToken = driverClient.getDriverIdByEmail(usernameFromToken);
 
         // Validation: only assigned driver can complete
         if (!trip.getDriverId().equals(driverIdFromToken)) {

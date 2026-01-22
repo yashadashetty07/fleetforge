@@ -25,13 +25,13 @@ public class Route {
     @Column(nullable = false)
     private String destination;
 
-    // 🧭 Coordinates
+    //  Coordinates
     private Double sourceLat;
     private Double sourceLng;
     private Double destinationLat;
     private Double destinationLng;
 
-    // 📏 Calculated fields
+    // Calculated fields
     private Double distanceKm;
     private Double estimatedDurationMinutes;
 }

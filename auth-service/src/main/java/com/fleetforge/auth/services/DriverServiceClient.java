@@ -1,4 +1,4 @@
-package com.fleetforge.trip.services;
+package com.fleetforge.auth.services;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -12,22 +12,22 @@ public class DriverServiceClient {
     private static final String BASE_URL = "http://driver-service:8083/api/drivers";
 
     // This calls: GET /api/drivers/username/{username}
-    public Long getDriverIdByEmail(String email) {
+    public Long getDriverIdByUsername(String username) {
 
         try {
             DriverResponse driver =
                     restTemplate.getForObject(
-                            BASE_URL + "/email/" + email,
+                            BASE_URL + "/username/" + username,
                             DriverResponse.class);
 
             if (driver == null) {
-                throw new RuntimeException("Driver not found with email: " + email);
+                throw new RuntimeException("Driver not found with username: " + username);
             }
 
             return driver.getId();
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve driverId for username: " + email);
+            throw new RuntimeException("Failed to retrieve driverId for username: " + username);
         }
     }
 

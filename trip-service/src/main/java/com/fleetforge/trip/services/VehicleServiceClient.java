@@ -7,7 +7,7 @@ import org.springframework.web.client.RestTemplate;
 public class VehicleServiceClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String BASE_URL = "http://localhost:8082/api/vehicles";
+    private final String BASE_URL = "http://vehicle-service:8082/api/vehicles";
 
     public void assignVehicle(Long vehicleId) {
         restTemplate.postForObject(BASE_URL + "/" + vehicleId + "/assign", null, Void.class);

@@ -21,9 +21,6 @@ public class RouteController {
     @Autowired
     private MapboxService mapboxService;
 
-    // -------------------------
-    // CRUD Endpoints
-    // -------------------------
     @PostMapping
     public ResponseEntity<Route> createRoute(@RequestBody Route route) {
         // TODO: integrate Mapbox API to auto-fill distance and ETA later
@@ -52,9 +49,7 @@ public class RouteController {
         return ResponseEntity.ok("Route " + id + " deleted successfully");
     }
 
-    // -------------------------
-    // Mapbox Integration
-    // -------------------------
+
     @GetMapping("/distance")
     public ResponseEntity<Map<String, Object>> getDistanceAndDuration(
             @RequestParam double originLng,
@@ -117,5 +112,11 @@ public class RouteController {
             return ResponseEntity.badRequest().body(Map.of("error", "Route calculation failed: " + e.getMessage()));
         }
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<String> search(@RequestParam String query) {
+        return ResponseEntity.ok(mapboxService.searchPlaces(query).toString());
+    }
+
 
 }
